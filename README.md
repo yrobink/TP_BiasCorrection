@@ -1,6 +1,31 @@
 
 # TP Bias correction
 
+## SBCK
+
+The TP uses the package SBCK (Statistical Bias Correction Kit), available in
+python:
+
+~~~bash
+pip3 install SBSK
+~~~
+
+or
+
+~~~bash
+git clone https://github.com/yrobink/SBCK-python
+cd SBCK-python
+pip3 install .
+~~~
+
+and available in R:
+
+~~~bash
+git clone https://github.com/yrobink/SBCK-R
+cd SBCK-R
+./build.R -i
+~~~
+
 
 ## License
 
