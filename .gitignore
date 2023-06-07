@@ -2,3 +2,5 @@
 *.swp
 *.RData
 *.html
+.Rproj.user
+.Rhistory

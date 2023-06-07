@@ -274,11 +274,7 @@ scenario = "rcp85"
 **Problème** Charger les données d'observations dans une variable `Y` à l'aide de la fonction `read_observations`, et utiliser la fonction `extract_period` ainsi que les variables précédentes pour construire les observations en période de calibration `Y0`.
 
 ```{r}
-Y = read_observations( zone , ipath )
-```
 
-```{r}
-Y0 = extract_period( Y , seas , calib )
 ```
 
 ## Le modèle à corriger
@@ -286,12 +282,7 @@ Y0 = extract_period( Y , seas , calib )
 **Problème** Charger les données modèles dans une variable `X` à l'aide de la fonction `read_models`, et utiliser la fonction `extract_period` ainsi que les variables précédentes pour construire le modèle en période de calibration `X0` et projection `X1`.
 
 ```{r}
-X = read_models( gcm , rcm , run , scenario , zone , ipath )
-```
 
-```{r}
-X0 = extract_period( X , seas , calib )
-X1 = extract_period( X , seas , proj  )
 ```
 
 ## Format des données
@@ -304,8 +295,7 @@ Les données `Y0`, `X0` et `X1` sont des matrices où les lignes sont l'axe du t
 **Problème** Affichez les noms des lignes et colonnes avec les fonctions `colnames` et `rownames`.
 
 ```{r}
-print(colnames(Y0))
-print(rownames(Y0)[1:10])
+
 ```
 
 ## Quels biais ?
@@ -317,11 +307,11 @@ print(rownames(Y0)[1:10])
 ***Tips*** Vu que nous allons sans cesse examiner des biais, il peut être utile de transformer les deux étapes précédentes en fonctions que vous pourrez appeler à la demande. Pour la correction j'ai par exemple construit la fonction `basic_bias( X , Y , lZ = NULL)` qui affiche les biais entre `Y` et `X`, et si la liste des corrections `lZ` n'est pas `NULL`, les biais entre `Y` et les éléments de `lZ`. J'ai fait de même pour les densités avec une fonction `plot_density( X , Y , Z = NULL )`.
 
 ```{r}
-basic_bias( X0 , Y0 )
+
 ```
 
 ```{r,fig.height=6,fig.width=9,fig.dpi=600}
-plot_density( X0 , Y0 )
+
 ```
 
 ------------------------------------------------------------------------
@@ -353,17 +343,7 @@ Z0 = bcm$predict(X0) ## Correction de X0
 **Problème** Corrigez `X0` et `X1` à l'aide de la méthode `SBCK::QM`. Utilisez ensuite la fonction `postprocessing`.
 
 ```{r}
-bcm = SBCK::QM$new()
-bcm$fit( Y0 , X0 )
-Z0 = bcm$predict(X0)
-Z1 = bcm$predict(X1)
-Z0 = postprocessing( Z0 , X0 )
-Z1 = postprocessing( Z1 , X1 )
-```
 
-```{r}
-lZ0 = list( qm = Z0 )
-lZ1 = list( qm = Z1 )
 ```
 
 ## Biais résiduels en calibration
@@ -371,11 +351,11 @@ lZ1 = list( qm = Z1 )
 **Problème** À l'aide des algorithmes développés à la section précédente, comparez les biais des données corrigées et des données d'origines.
 
 ```{r}
-basic_bias( X0 , Y0 , lZ0 )
+
 ```
 
 ```{r,fig.height=6,fig.width=9,fig.dpi=600}
-plot_density( X0 , Y0 , Z0 )
+
 ```
 
 ## Et la période de projection ?
@@ -387,11 +367,11 @@ $$ \mathbb{E}(\mathbf{X}^1) - \mathbb{E}(\mathbf{X}^0) $$ $$ \frac{\mathbb{E}(\m
 **Problème 2** De la même manière, affichez les densités de `X0`, `X1`, `Z0` et `Z1`.
 
 ```{r}
-delta_projection( X0 , X1 , lZ0 , lZ1 )
+
 ```
 
 ```{r,fig.height=6,fig.width=9,fig.dpi=600}
-plot_projection_density( X0 , Y0 , X1 , lZ1 )
+
 ```
 
 ## Résumé
@@ -437,16 +417,7 @@ Z1 = Z$Z1
 **Problème** Corriger `X0` et `X1` à l'aide de CDF-$t$.
 
 ```{r}
-bcm = SBCK::CDFt$new()
-bcm$fit( Y0 , X0 , X1 )
-Z  = bcm$predict(X1,X0)
-Z0 = postprocessing( Z$Z0 , X0 )
-Z1 = postprocessing( Z$Z1 , X1 )
-```
 
-```{r}
-lZ0[["cdft"]] = Z0
-lZ1[["cdft"]] = Z1
 ```
 
 ## Biais résiduels en calibration
@@ -454,7 +425,7 @@ lZ1[["cdft"]] = Z1
 **Problème** Comparez les biais des données corrigées et des données d'origines.
 
 ```{r}
-basic_bias( X0 , Y0 , lZ0 )
+
 ```
 
 ## Et la période de projection ?
@@ -462,11 +433,11 @@ basic_bias( X0 , Y0 , lZ0 )
 **Problème** Reproduisez l'analyse de la section précédente, et comparer la aux résultats du quantile mapping.
 
 ```{r}
-delta_projection( X0 , X1 , lZ0 , lZ1 )
+
 ```
 
 ```{r,fig.height=6,fig.width=9,fig.dpi=600}
-plot_projection_density( X0 , Y0 , X1 , lZ1 )
+
 ```
 
 ## Calcul des ETPs
@@ -481,25 +452,11 @@ Nous allons maintenant calculer l'évapotranspiration potentielle (*ETP* en Fran
 **Problème** À l'aide la fonction `find_ETP` du fichier `ETP.R` (qui a normalement déja été chargé au début de ce TP avec la fonction `source`), calculez les ETPs de `Y0`, `X0`, et des différentes corrections `Z0`. Comparez les.
 
 ```{r}
-etpY0 = find_ETP( Y0 , zone = zone )
-etpX0 = find_ETP( X0 , zone = zone )
-etpX1 = find_ETP( X1 , zone = zone )
 
-letpZ0 = list()
-letpZ1 = list()
-for( bc in names(lZ0) )
-{
-	letpZ0[[bc]] = find_ETP( lZ0[[bc]] , zone = zone )
-	letpZ1[[bc]] = find_ETP( lZ1[[bc]] , zone = zone )
-}
-```
-
-```{r}
-basic_bias( etpX0 , etpY0 , letpZ0 )
 ```
 
 ```{r,fig.height=6,fig.width=6,fig.dpi=600}
-plot_density_ETP( etpX0 , etpY0 , letpZ0 )
+
 ```
 
 ## La structure de dépendance
@@ -518,16 +475,11 @@ Y0TMu  = rvY0TM$rvs(1000)
 **Problème 2** Sur un même graphique, représentez `tas` en fonction de `tasmin` pour `Y0`, et les deux séries que vous avez généré.
 
 ```{r}
-rvY0TM = ROOPSD::rv_histogram$new()$fit(Y0[,1])
-rvY0TN = ROOPSD::rv_histogram$new()$fit(Y0[,2])
-Y0TMu  = rvY0TM$rvs(1000)
-Y0TNu  = rvY0TN$rvs(1000)
+
 ```
 
 ```{r,fig.height=6,fig.width=6,fig.dpi=600}
-par( mfrow = base::c(1,1) )
-plot( Y0[,1] , Y0[,2] , type = "p" , col = "blue" , xlim = base::c(5,28) , ylim = base::c(5,25) , xlab = "tas" , ylab = "tasmin" )
-points( Y0TMu , Y0TNu , col = "red" )
+
 ```
 
 ### Température et vent
@@ -537,20 +489,7 @@ Nous avons donc pu voir à quel point la structure de dépendance est importante
 **Problème** Représentez sur une figure la structure de dépendance entre `tas` et `sfcWind` pour `X0`, `Y0` et la correction `Z0` de CDF-$t$.
 
 ```{r,fig.height=3,fig.width=6,fig.dpi=600}
-Z0 = lZ0$cdft
-par( mfrow = base::c(1,3) )
-i = "tas"
-j = "sfcWind"
-ylim = c(0,10)
-xlim = c(0,30)
-plot( Y0[,i] , Y0[,j] , type = "p" , col = "blue" , xlim = xlim , ylim = ylim , xlab = i , ylab = j )
-points( X0[,i] , X0[,j] , col = grDevices::rgb(1,0,0,0.2) )
 
-plot(   Y0[,i] , Y0[,j] , type = "p" , col = "blue" , xlim = xlim , ylim = ylim , xlab = i , ylab = j )
-points( Z0[,i] , Z0[,j] , col = grDevices::rgb(0,1,0,0.5) )
-
-plot(   X0[,i] , X0[,j] , type = "p" , col = "red" , xlim = xlim , ylim = ylim , xlab = i , ylab = j )
-points( Z0[,i] , Z0[,j] , col = grDevices::rgb(0,1,0,0.5) )
 ```
 
 ### Les corrélations
@@ -560,7 +499,7 @@ Les corrélations sont une mesure de la dépendance entre variables.
 **Problème** À l'aide de la fonction `cor`, calculez les corrélations entre variables de `Y0`, `X0` et des corrections; et comparez les.
 
 ```{r}
-corr_bias( X0 , Y0 , lZ0 , relatif = FALSE )
+
 ```
 
 ## Résumé
@@ -624,16 +563,11 @@ Cette approche permet de tenir compte d'une évolution du modèle au travers de 
 **Problème** Utilisez la méthode R$^2$D$^2$ pour faire la correction, avec la variable `tas` comme variable de conditionnement (méthode `AR2D2`, mot clé `col_cond`).
 
 ```{r}
-bcm = SBCK::AR2D2$new( col_cond = 1 )
-bcm$fit( Y0 , X0 , X1 )
-Z  = bcm$predict(X1,X0)
-Z0 = postprocessing( Z$Z0 , X0 )
-Z1 = postprocessing( Z$Z1 , X1 )
+
 ```
 
 ```{r}
-lZ0[["r2d2"]] = Z0
-lZ1[["r2d2"]] = Z1
+
 ```
 
 ## Biais résiduels en calibration
@@ -641,7 +575,7 @@ lZ1[["r2d2"]] = Z1
 **Problème** Comparez les biais des données corrigées et des données d'origines.
 
 ```{r}
-basic_bias( X0 , Y0 , lZ0 )
+
 ```
 
 ## Et la période de projection ?
@@ -649,11 +583,11 @@ basic_bias( X0 , Y0 , lZ0 )
 **Problème** Reproduisez l'analyse de la section précédente, et comparez la aux résultats de CDF-$t$.
 
 ```{r}
-delta_projection( X0 , X1 , lZ0 , lZ1 )
+
 ```
 
 ```{r,fig.height=6,fig.width=9,fig.dpi=600}
-plot_projection_density( X0 , Y0 , X1 , lZ1 )
+
 ```
 
 ## Température et vent (bis)
@@ -661,20 +595,7 @@ plot_projection_density( X0 , Y0 , X1 , lZ1 )
 **Problème** Représentez sur une figure la structure de dépendance entre `tas` et `sfcWind` pour `X0`, `Y0` et la correction `Z0` de R$^2$D$^2$. Conclusion par rapport à CDF-$t$?
 
 ```{r,fig.height=3,fig.width=6,fig.dpi=600}
-Z0 = lZ0$r2d2
-par( mfrow = base::c(1,3) )
-i = "tas"
-j = "sfcWind"
-ylim = c(0,10)
-xlim = c(0,30)
-plot( Y0[,i] , Y0[,j] , type = "p" , col = "blue" , xlim = xlim , ylim = ylim , xlab = i , ylab = j )
-points( X0[,i] , X0[,j] , col = grDevices::rgb(1,0,0,0.2) )
 
-plot(   Y0[,i] , Y0[,j] , type = "p" , col = "blue" , xlim = xlim , ylim = ylim , xlab = i , ylab = j )
-points( Z0[,i] , Z0[,j] , col = grDevices::rgb(0,1,0,0.5) )
-
-plot(   X0[,i] , X0[,j] , type = "p" , col = "red" , xlim = xlim , ylim = ylim , xlab = i , ylab = j )
-points( Z0[,i] , Z0[,j] , col = grDevices::rgb(0,1,0,0.5) )
 ```
 
 ## Calcul des corrélations
@@ -682,11 +603,11 @@ points( Z0[,i] , Z0[,j] , col = grDevices::rgb(0,1,0,0.5) )
 **Problème** Reproduisez l'analyse des corrélations de la section précédente, et comparez la aux résultats de CDF-$t$.
 
 ```{r}
-corr_bias( X0 , Y0 , lZ0 , relatif = FALSE )
+
 ```
 
 ```{r}
-corr_bias( X0 , Y0 , lZ0 , relatif = TRUE )
+
 ```
 
 ## Calcul des ETPs
@@ -694,17 +615,15 @@ corr_bias( X0 , Y0 , lZ0 , relatif = TRUE )
 **Problème** Calculez maintenant les ETPs de la correction R$^2$D$^2$. Analysez les biais et afficher la densité.
 
 ```{r}
-bc = "r2d2"
-letpZ0[[bc]] = find_ETP( lZ0[[bc]] , zone = zone )
-letpZ1[[bc]] = find_ETP( lZ1[[bc]] , zone = zone )
+
 ```
 
 ```{r}
-basic_bias( etpX0 , etpY0 , letpZ0 )
+
 ```
 
 ```{r,fig.height=6,fig.width=6,fig.dpi=600}
-plot_density_ETP( etpX0 , etpY0 , letpZ0 )
+
 ```
 
 ## Les séquences de 0 de la pluie
@@ -712,17 +631,7 @@ plot_density_ETP( etpX0 , etpY0 , letpZ0 )
 **Problème** Calculez et représentez sur un graphique le nombre de cluster de 0 de taille 1 jour, 2 jours... 10 jours; pour les observations et les corrections. (Voir la fonction `nb_cluster_0`).
 
 ```{r,fig.height=6,fig.width=6,fig.dpi=600}
-n_day = 10
 
-par( mfrow = base::c(1,1) )
-colorsZ = base::c( "orange" , "green" , "purple" )
-
-plot( 1:n_day , nb_cluster_0( Y0[,6] , n_day ) , type = "l" , col = "blue" , xlab = "Taille cluster" , ylab = "Nombre de cluster" , ylim = c(0,400) )
-for( i in 1:length(lZ0) )
-{
-	Z0 = lZ0[[i]]
-	lines( 1:n_day , nb_cluster_0( Z0[,6] , n_day ) , type = "l" , col = colorsZ[i] )
-}
 ```
 
 ## Et les biais mensuels ?
@@ -730,22 +639,7 @@ for( i in 1:length(lZ0) )
 **Problème** Calculer les biais de chaque mois individuellement sur la période de calibration. Conclusion ?
 
 ```{r}
-for( m in base::c("06","07","08") )
-{
-	X0m = subset( X0 , format.Date( rownames(X0) , "%m" ) == m )
-	Y0m = subset( Y0 , format.Date( rownames(Y0) , "%m" ) == m )
-	
-	lZ0m = list()
-	for( bc in names(lZ0) )
-	{
-		lZ0m[[bc]] = subset( lZ0[[bc]] , format.Date( rownames(lZ0[[bc]]) , "%m" ) == m )
-	}
-	
-	cat( "//====================\\\\" , end = "\n" )
-	cat( paste0( "|| Month " , m , "           ||" ) , end = "\n" )
-	cat( "\\\\====================//" , end = "\n" )
-	basic_bias( X0m , Y0m , lZ0m )
-}
+
 ```
 
 ## Résumé
@@ -774,30 +668,15 @@ Une extension de R$^2$D$^2$ permet de corriger le temporel. Elle consiste à ne 
 **Problème** Reprenez la correction avec R$^2$D$^2$, `lag_search=6` et `lag_keep=3`, et comparez les clusters de 0.
 
 ```{r}
-bcm = SBCK::AR2D2$new( col_cond = 1 , lag_search = 6 , lag_keep = 3 )
-bcm$fit( Y0 , X0 , X1 )
-Z  = bcm$predict(X1,X0)
-Z0 = postprocessing( Z$Z0 , X0 )
-Z1 = postprocessing( Z$Z1 , X1 )
+
 ```
 
 ```{r}
-lZ0[["r2d22L"]] = Z0
-lZ1[["r2d22L"]] = Z1
+
 ```
 
 ```{r,fig.height=6,fig.width=6,fig.dpi=600}
-n_day = 10
 
-par( mfrow = base::c(1,1) )
-colorsZ = base::c( "orange" , "green" , "purple" , "black" )
-
-plot( 1:n_day , nb_cluster_0( Y0[,6] , n_day ) , type = "l" , col = "blue" , xlab = "Taille cluster" , ylab = "Nombre de cluster" , ylim = c(0,400) )
-for( i in 1:length(lZ0) )
-{
-	Z0 = lZ0[[i]]
-	lines( 1:n_day , nb_cluster_0( Z0[,6] , n_day ) , type = "l" , col = colorsZ[i] )
-}
 ```
 
 ------------------------------------------------------------------------
